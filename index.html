@@ -272,24 +272,7 @@
 
                     this.populateSelects();
                 } catch (e) {
-                    console.error("Data load error (Menggunakan mock data):", e);
-                    
-                    this.data.settings = { shopName: "BARBERSHOP", queuePrefix: "A", avgDuration: 30 };
-                    this.data.services = [
-                        { id: 's1', name: 'Gunting Rambut Biasa', duration: 30 },
-                        { id: 's2', name: 'Gunting Kanak-Kanak', duration: 20 },
-                        { id: 's3', name: 'Potong & Cuci', duration: 45 },
-                        { id: 's4', name: 'Trim Janggut / Misai', duration: 15 }
-                    ];
-                    this.data.barbers = [
-                        { id: 'b1', name: 'Ahmad' },
-                        { id: 'b2', name: 'John' },
-                        { id: 'b3', name: 'Zack' }
-                    ];
-                    
-                    document.getElementById('nav-shop-name').innerText = this.data.settings.shopName.toUpperCase();
-                    document.getElementById('home-shop-name').innerText = this.data.settings.shopName.toUpperCase();
-                    this.populateSelects();
+                    console.error("Data load error:", e);
                 }
             },
 
