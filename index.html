@@ -1,3 +1,4 @@
+<!-- customer/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,8 +12,8 @@
             theme: {
                 extend: {
                     colors: {
-                        darkblue: '#0f172a', // slate-900
-                        primary: '#1e3a8a', // blue-900
+                        darkblue: '#0f172a',
+                        primary: '#1e3a8a',
                     }
                 }
             }
@@ -40,133 +41,132 @@
         <!-- Loading Overlay -->
         <div id="loading-overlay" class="absolute inset-0 bg-gray-50 z-50 flex flex-col items-center justify-center hidden-view">
             <div class="spinner mb-4"></div>
-            <p class="text-darkblue font-semibold">Loading...</p>
+            <p class="text-darkblue font-semibold">Memuatkan data...</p>
         </div>
 
         <!-- VIEW: Home -->
         <section id="view-home" class="hidden-view flex flex-col items-center justify-center pt-12 space-y-8">
             <div class="text-center">
-                <p class="text-sm text-gray-500 uppercase tracking-widest mb-2">Welcome To</p>
-                <h2 class="text-4xl font-extrabold text-darkblue mb-4" id="home-shop-name">PREMIUM BARBERSHOP</h2>
-                <p class="text-gray-600 max-w-md mx-auto">Experience the best grooming service in town. Walk in or book your preferred time.</p>
+                <p class="text-sm text-gray-500 uppercase tracking-widest mb-2">Selamat Datang Ke</p>
+                <h2 class="text-4xl font-extrabold text-darkblue mb-4" id="home-shop-name">BARBERSHOP</h2>
+                <p class="text-gray-600 max-w-md mx-auto">Nikmati perkhidmatan dandanan rambut terbaik. Sila ambil nombor giliran atau buat tempahan slot anda.</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl mt-8">
                 <button onclick="app.navigate('queue-form')" class="bg-white border-2 border-darkblue text-darkblue hover:bg-darkblue hover:text-white transition-all p-8 rounded-xl shadow-lg flex flex-col items-center justify-center group">
                     <i class="fas fa-ticket-alt text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-2xl font-bold">JOIN QUEUE</span>
-                    <span class="text-sm mt-2 opacity-80">Walk in & get your number</span>
+                    <span class="text-2xl font-bold">AMBIL GILIRAN</span>
+                    <span class="text-sm mt-2 opacity-80">Walk-in & dapatkan nombor giliran</span>
                 </button>
                 <button onclick="app.navigate('booking-form')" class="bg-primary text-white hover:bg-darkblue transition-all p-8 rounded-xl shadow-lg flex flex-col items-center justify-center group">
                     <i class="fas fa-calendar-check text-4xl mb-4 group-hover:scale-110 transition-transform"></i>
-                    <span class="text-2xl font-bold">BOOK APPOINTMENT</span>
-                    <span class="text-sm mt-2 opacity-80">Reserve your preferred time</span>
+                    <span class="text-2xl font-bold">TEMPAH TEMPOH</span>
+                    <span class="text-sm mt-2 opacity-80">Pilih tarikh & masa pilihan anda</span>
                 </button>
             </div>
         </section>
 
         <!-- VIEW: Queue Form -->
         <section id="view-queue-form" class="hidden-view max-w-lg mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md mt-4">
-            <h3 class="text-2xl font-bold text-darkblue border-b pb-4 mb-6"><i class="fas fa-ticket-alt mr-2"></i> Get Queue Number</h3>
+            <h3 class="text-2xl font-bold text-darkblue border-b pb-4 mb-6"><i class="fas fa-ticket-alt mr-2"></i> Borang Nombor Giliran</h3>
             <form id="form-queue" onsubmit="app.submitQueue(event)">
                 <div class="mb-5">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Select Service *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Servis *</label>
                     <select id="q-service" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50"></select>
                 </div>
                 <div class="mb-5">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Select Barber (Optional)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Tukang Gunting (Pilihan)</label>
                     <select id="q-barber" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
-                        <option value="">Any Available Barber</option>
+                        <option value="">Mana-mana Tukang Gunting</option>
                     </select>
                 </div>
                 <div class="mb-5">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Your Name *</label>
-                    <input type="text" id="q-name" required placeholder="John Doe" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Anda *</label>
+                    <input type="text" id="q-name" required placeholder="Ahmad Farhan" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
                 </div>
                 <div class="mb-8">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nombor Telefon *</label>
                     <input type="tel" id="q-phone" required placeholder="0123456789" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
                 </div>
-                <button type="submit" class="w-full bg-darkblue text-white font-bold py-4 rounded-lg shadow-lg hover:bg-primary transition-colors">JOIN QUEUE</button>
-                <button type="button" onclick="app.navigate('home')" class="w-full mt-3 text-gray-500 font-semibold py-2 hover:text-darkblue">Cancel</button>
+                <button type="submit" class="w-full bg-darkblue text-white font-bold py-4 rounded-lg shadow-lg hover:bg-primary transition-colors">AMBIL NOMBOR GILIRAN</button>
+                <button type="button" onclick="app.navigate('home')" class="w-full mt-3 text-gray-500 font-semibold py-2 hover:text-darkblue">Batal</button>
             </form>
         </section>
 
         <!-- VIEW: Queue Status -->
         <section id="view-queue-status" class="hidden-view flex flex-col items-center justify-center pt-8 space-y-6">
             <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md text-center border-t-8 border-darkblue relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-lg" id="status-badge">WAITING</div>
-                <p class="text-gray-500 font-semibold mb-1 uppercase tracking-wide">Your Queue Number</p>
+                <div class="absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-lg" id="status-badge">MENUNGGU</div>
+                <p class="text-gray-500 font-semibold mb-1 uppercase tracking-wide">Nombor Giliran Anda</p>
                 <h1 class="text-7xl font-black text-darkblue mb-6 tracking-tighter" id="qs-my-number">--</h1>
                 
                 <div class="grid grid-cols-2 gap-4 border-t border-gray-100 pt-6">
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="text-xs text-gray-500 font-semibold uppercase">Currently Serving</p>
+                        <p class="text-xs text-gray-500 font-semibold uppercase">Sedang Dilayan</p>
                         <p class="text-2xl font-bold text-gray-800 mt-1" id="qs-current">--</p>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg">
-                        <p class="text-xs text-gray-500 font-semibold uppercase">Customers Ahead</p>
+                        <p class="text-xs text-gray-500 font-semibold uppercase">Pelanggan Di Hadapan</p>
                         <p class="text-2xl font-bold text-gray-800 mt-1" id="qs-ahead">--</p>
                     </div>
                 </div>
                 
                 <div class="mt-4 bg-blue-50 p-4 rounded-lg border border-blue-100">
-                    <p class="text-sm text-blue-800 font-semibold uppercase">Est. Waiting Time</p>
-                    <p class="text-xl font-bold text-primary mt-1" id="qs-eta">-- min</p>
+                    <p class="text-sm text-blue-800 font-semibold uppercase">Anggaran Masa Menunggu</p>
+                    <p class="text-xl font-bold text-primary mt-1" id="qs-eta">-- minit</p>
                 </div>
 
                 <div class="mt-6 text-left text-sm text-gray-600 bg-gray-50 p-3 rounded border">
-                    <p><strong>Service:</strong> <span id="qs-service">--</span></p>
-                    <p><strong>Barber:</strong> <span id="qs-barber">--</span></p>
+                    <p><strong>Servis:</strong> <span id="qs-service">--</span></p>
+                    <p><strong>Tukang Gunting:</strong> <span id="qs-barber">--</span></p>
                 </div>
 
                 <div id="qs-alert" class="mt-6 hidden p-4 rounded-lg font-bold text-lg animate-pulse"></div>
             </div>
-            <p class="text-sm text-gray-400">Save this page's URL or screenshot to track your status.</p>
+            <p class="text-sm text-gray-400">Simpan pautan halaman ini untuk memantau status anda secara langsung.</p>
         </section>
 
         <!-- VIEW: Booking Form -->
         <section id="view-booking-form" class="hidden-view max-w-lg mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md mt-4">
-            <h3 class="text-2xl font-bold text-darkblue border-b pb-4 mb-6"><i class="fas fa-calendar-check mr-2"></i> Book Appointment</h3>
+            <h3 class="text-2xl font-bold text-darkblue border-b pb-4 mb-6"><i class="fas fa-calendar-check mr-2"></i> Borang Tempahan Slot</h3>
             <form id="form-booking" onsubmit="app.submitBooking(event)">
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Select Service *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Servis *</label>
                     <select id="b-service" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50"></select>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Select Barber *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Tukang Gunting *</label>
                     <select id="b-barber" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
-                        <option value="">Select Barber</option>
+                        <option value="">Pilih Tukang Gunting</option>
                     </select>
                 </div>
                 <div class="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Date *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tarikh *</label>
                         <input type="date" id="b-date" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Time *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Masa *</label>
                         <select id="b-time" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
-                            <option value="">Select Time</option>
-                            <!-- Timeslots generated by JS -->
+                            <option value="">Pilih Masa</option>
                         </select>
                     </div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Your Name *</label>
-                    <input type="text" id="b-name" required placeholder="John Doe" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Anda *</label>
+                    <input type="text" id="b-name" required placeholder="Ahmad Farhan" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
                 </div>
                 <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nombor Telefon *</label>
                     <input type="tel" id="b-phone" required placeholder="0123456789" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50">
                 </div>
                 <div class="mb-8">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Notes (Optional)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Catatan (Pilihan)</label>
                     <textarea id="b-notes" rows="2" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary outline-none bg-gray-50"></textarea>
                 </div>
                 <p id="b-error" class="text-red-500 text-sm font-bold mb-4 hidden"></p>
-                <button type="submit" class="w-full bg-primary text-white font-bold py-4 rounded-lg shadow-lg hover:bg-darkblue transition-colors">CONFIRM BOOKING</button>
-                <button type="button" onclick="app.navigate('home')" class="w-full mt-3 text-gray-500 font-semibold py-2 hover:text-darkblue">Cancel</button>
+                <button type="submit" class="w-full bg-primary text-white font-bold py-4 rounded-lg shadow-lg hover:bg-darkblue transition-colors">SAHKAN TEMPAHAN</button>
+                <button type="button" onclick="app.navigate('home')" class="w-full mt-3 text-gray-500 font-semibold py-2 hover:text-darkblue">Batal</button>
             </form>
         </section>
 
@@ -175,40 +175,40 @@
             <div id="ticket-container" class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md border border-gray-200">
                 <div class="text-center border-b-2 border-dashed border-gray-300 pb-6 mb-6">
                     <i class="fas fa-check-circle text-5xl text-green-500 mb-3"></i>
-                    <h2 class="text-2xl font-black text-darkblue tracking-widest uppercase">Booking Confirmed</h2>
+                    <h2 class="text-2xl font-black text-darkblue tracking-widest uppercase">TEMPAHAN DISAHKAN</h2>
                     <p class="text-sm font-mono text-gray-500 mt-2" id="bc-id">BK-000000</p>
                 </div>
                 <div class="space-y-4">
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-gray-500 font-semibold">Customer</span>
+                        <span class="text-gray-500 font-semibold">Pelanggan</span>
                         <span class="font-bold text-gray-800" id="bc-name">--</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-gray-500 font-semibold">Service</span>
+                        <span class="text-gray-500 font-semibold">Servis</span>
                         <span class="font-bold text-gray-800" id="bc-service">--</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-gray-500 font-semibold">Barber</span>
+                        <span class="text-gray-500 font-semibold">Tukang Gunting</span>
                         <span class="font-bold text-gray-800" id="bc-barber">--</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-gray-500 font-semibold">Date</span>
+                        <span class="text-gray-500 font-semibold">Tarikh</span>
                         <span class="font-bold text-primary" id="bc-date">--</span>
                     </div>
                     <div class="flex justify-between border-b pb-2">
-                        <span class="text-gray-500 font-semibold">Time</span>
+                        <span class="text-gray-500 font-semibold">Masa</span>
                         <span class="font-bold text-primary" id="bc-time">--</span>
                     </div>
                     <div class="flex justify-between">
                         <span class="text-gray-500 font-semibold">Status</span>
-                        <span class="font-bold text-green-600">CONFIRMED</span>
+                        <span class="font-bold text-green-600">DISAHKAN</span>
                     </div>
                 </div>
             </div>
             <button onclick="window.print()" class="mt-8 bg-darkblue text-white px-8 py-3 rounded-full font-bold shadow-lg hover:bg-primary transition-all">
-                <i class="fas fa-camera mr-2"></i> SCREENSHOT THIS TICKET
+                <i class="fas fa-camera mr-2"></i> TANGKAP LAYAR (SCREENSHOT) TIKET INI
             </button>
-            <button onclick="app.navigate('home')" class="mt-4 text-gray-500 font-semibold hover:text-darkblue">Back to Home</button>
+            <button onclick="app.navigate('home')" class="mt-4 text-gray-500 font-semibold hover:text-darkblue">Kembali ke Utama</button>
         </section>
 
     </main>
@@ -217,7 +217,7 @@
     <script type="module">
         // ================================
         // FIREBASE CONFIGURATION
-        // Replace these values
+        // Gantikan nilai ini dengan butiran Firebase anda
         // ================================
         const firebaseConfig = {
             apiKey: "AIzaSyBBXZkkgYlQgEvVwNcVeYJpBfcaFNo89j0",
@@ -244,7 +244,6 @@
                 this.setupDateConstraints();
                 this.showLoading(false);
                 
-                // Check if returning from URL with tracking token
                 const urlParams = new URLSearchParams(window.location.search);
                 const token = urlParams.get('queue');
                 if (token) {
@@ -256,34 +255,31 @@
 
             async loadInitialData() {
                 try {
-                    // Settings
                     const setDocRes = await getDoc(doc(db, "settings", "general"));
                     this.data.settings = setDocRes.exists() ? setDocRes.data() : { shopName: "BARBERSHOP", queuePrefix: "A", avgDuration: 30 };
                     document.getElementById('nav-shop-name').innerText = this.data.settings.shopName.toUpperCase();
                     document.getElementById('home-shop-name').innerText = this.data.settings.shopName.toUpperCase();
 
-                    // Services
                     const sSnap = await getDocs(query(collection(db, "services"), where("active", "==", true)));
                     this.data.services = sSnap.docs.map(d => ({id: d.id, ...d.data()}));
                     
-                    // Barbers
                     const bSnap = await getDocs(query(collection(db, "barbers"), where("active", "==", true)));
                     this.data.barbers = bSnap.docs.map(d => ({id: d.id, ...d.data()}));
 
                     this.populateSelects();
                 } catch (e) {
-                    console.error("Data load error:", e);
+                    console.error("Gagal memuatkan data:", e);
                 }
             },
 
             populateSelects() {
-                const sHtml = '<option value="">Select Service</option>' + this.data.services.map(s => `<option value="${s.id}">${s.name} - ${s.duration}m</option>`).join('');
+                const sHtml = '<option value="">Pilih Servis</option>' + this.data.services.map(s => `<option value="${s.id}">${s.name} - RM${s.price || 0} (${s.duration || 30}m)</option>`).join('');
                 document.getElementById('q-service').innerHTML = sHtml;
                 document.getElementById('b-service').innerHTML = sHtml;
 
-                const bHtml = '<option value="">Any Barber</option>' + this.data.barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+                const bHtml = '<option value="">Mana-mana Tukang Gunting</option>' + this.data.barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
                 document.getElementById('q-barber').innerHTML = bHtml;
-                document.getElementById('b-barber').innerHTML = '<option value="">Select Barber</option>' + this.data.barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
+                document.getElementById('b-barber').innerHTML = '<option value="">Pilih Tukang Gunting</option>' + this.data.barbers.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
             },
 
             setupDateConstraints() {
@@ -291,10 +287,11 @@
                 const today = new Date();
                 dt.min = today.toISOString().split('T')[0];
                 
-                // Generate simple 30 min timeslots (10 AM to 8 PM)
-                let tHtml = '<option value="">Select Time</option>';
+                let tHtml = '<option value="">Pilih Masa</option>';
                 for(let h=10; h<=19; h++) {
-                    tHtml += `<option value="${h}:00">${h}:00</option><option value="${h}:30">${h}:30</option>`;
+                    const timeStr1 = `${h < 10 ? '0'+h : h}:00`;
+                    const timeStr2 = `${h < 10 ? '0'+h : h}:30`;
+                    tHtml += `<option value="${timeStr1}">${timeStr1}</option><option value="${timeStr2}">${timeStr2}</option>`;
                 }
                 document.getElementById('b-time').innerHTML = tHtml;
             },
@@ -326,14 +323,13 @@
                 const sId = document.getElementById('q-service').value;
                 const bId = document.getElementById('q-barber').value;
                 const service = this.data.services.find(s => s.id === sId);
-                const barber = this.data.barbers.find(b => b.id === bId) || { id: null, name: 'Any Available' };
+                const barber = this.data.barbers.find(b => b.id === bId) || { id: null, name: 'Mana-mana Tukang Gunting' };
                 const bDate = this.getBusinessDate();
                 
                 try {
                     const counterRef = doc(db, "counters", `queue_${bDate}`);
                     let newSeq = 1;
                     
-                    // Transaction to safely increment sequence
                     await runTransaction(db, async (transaction) => {
                         const counterDoc = await transaction.get(counterRef);
                         if (!counterDoc.exists()) {
@@ -369,7 +365,7 @@
                     this.monitorQueue(token);
                 } catch (err) {
                     console.error(err);
-                    alert("Error joining queue. Please try again.");
+                    alert("Ralat semasa mendaftar giliran. Sila cuba lagi.");
                     this.showLoading(false);
                 }
             },
@@ -401,21 +397,20 @@
                         badge.className = "absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg animate-pulse";
                         alertBox.classList.remove('hidden');
                         alertBox.classList.add('bg-blue-100', 'text-blue-800', 'animate-pulse');
-                        alertBox.innerText = "YOU ARE NEXT. PLEASE PROCEED TO BARBER.";
+                        alertBox.innerText = "GILIRAN ANDA SETERUSNYA. SILA MASUK KE KEDAI.";
                     } else if (q.status === "SERVING") {
                         badge.className = "absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg";
                         alertBox.classList.remove('hidden');
                         alertBox.classList.add('bg-green-100', 'text-green-800');
                         alertBox.classList.remove('animate-pulse');
-                        alertBox.innerText = "YOUR SERVICE HAS STARTED.";
+                        alertBox.innerText = "SERVIS ANDA SEDANG BERJALAN.";
                     } else if (q.status === "COMPLETED") {
                         badge.className = "absolute top-0 right-0 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg";
                         alertBox.classList.remove('hidden');
                         alertBox.classList.add('bg-gray-100', 'text-gray-800');
-                        alertBox.innerText = "THANK YOU FOR VISITING!";
+                        alertBox.innerText = "TERIMA KASIH ATAS KUNJUNGAN ANDA!";
                     }
 
-                    // Calculate current & ahead (simplified for client-side MVP)
                     if (q.status === "WAITING") {
                         const allQ = await getDocs(query(collection(db, "queues"), where("businessDate", "==", q.businessDate), where("status", "in", ["WAITING", "CALLED", "SERVING"])));
                         let currentServing = "--";
@@ -433,10 +428,10 @@
                         const avgDuration = this.data.settings.avgDuration || 30;
                         const activeBarbers = this.data.barbers.length || 1;
                         const eta = Math.ceil((aheadCount * avgDuration) / activeBarbers);
-                        document.getElementById('qs-eta').innerText = `${eta}-${eta+15} min`;
+                        document.getElementById('qs-eta').innerText = `${eta}-${eta+15} minit`;
                     } else {
                          document.getElementById('qs-ahead').innerText = "0";
-                         document.getElementById('qs-eta').innerText = "-- min";
+                         document.getElementById('qs-eta').innerText = "-- minit";
                     }
                 });
             },
@@ -456,7 +451,6 @@
                 const barber = this.data.barbers.find(b => b.id === bId);
 
                 try {
-                    // MVP Validation Check
                     const existing = await getDocs(query(collection(db, "bookings"), 
                         where("barberId", "==", bId), 
                         where("date", "==", date), 
@@ -465,7 +459,7 @@
                     ));
 
                     if (!existing.empty) {
-                        errEl.innerText = "This time slot is no longer available. Please select another time.";
+                        errEl.innerText = "Slot masa ini telah pun ditempah. Sila pilih masa yang lain.";
                         errEl.classList.remove('hidden');
                         this.showLoading(false);
                         return;
@@ -489,7 +483,6 @@
 
                     await setDoc(doc(db, "bookings", bookingId), bData);
                     
-                    // Show confirmation
                     document.getElementById('bc-id').innerText = bookingId;
                     document.getElementById('bc-name').innerText = bData.customerName;
                     document.getElementById('bc-service').innerText = bData.serviceName;
@@ -503,7 +496,7 @@
                     
                 } catch(err) {
                     console.error(err);
-                    errEl.innerText = "An error occurred. Please try again.";
+                    errEl.innerText = "Ralat berlaku. Sila cuba lagi.";
                     errEl.classList.remove('hidden');
                     this.showLoading(false);
                 }
