@@ -3,588 +3,483 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barbershop Booking & Queue</title>
+    <title>Barbershop - Queue & Booking</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { primary: '#0f172a', secondary: '#1e3a8a', accent: '#3b82f6', light: '#f8fafc' }
+                    colors: {
+                        primary: '#1e3a8a', // Dark Blue
+                        secondary: '#ffffff', // White
+                        accent: '#3b82f6'
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc; }
-        .view { display: none; }
-        .view.active { display: block; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #1e3a8a; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden-view { display: none !important; }
+        .spinner { border: 3px solid rgba(255,255,255,.3); border-radius: 50%; border-top-color: #fff; width: 20px; height: 20px; animation: spin 1s ease-in-out infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Screenshot friendly ticket */
+        .ticket-cutout { position: relative; background: #fff; border-radius: 0.5rem; }
+        .ticket-cutout::before, .ticket-cutout::after { content: ''; position: absolute; top: 50%; width: 20px; height: 20px; background: #f3f4f6; border-radius: 50%; transform: translateY(-50%); }
+        .ticket-cutout::before { left: -10px; }
+        .ticket-cutout::after { right: -10px; }
     </style>
 </head>
-<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-gray-50 text-gray-800 font-sans antialiased selection:bg-primary selection:text-white pb-20">
 
-    <header class="bg-primary text-white shadow-md p-4 sticky top-0 z-50">
-        <div class="max-w-md mx-auto flex justify-between items-center cursor-pointer" onclick="navigate('home')">
-            <h1 id="header-shop-name" class="text-xl font-bold tracking-wider">PREMIUM BARBERSHOP</h1>
-            <div id="header-logo" class="w-8 h-8 bg-white rounded-full flex items-center justify-center text-primary font-bold text-xs">B</div>
-        </div>
-    </header>
-
-    <!-- Global Error Banner -->
-    <div id="error-banner" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-md mx-auto w-full mt-4 rounded shadow" role="alert">
-        <p class="font-bold">Notice</p>
-        <p id="error-message" class="text-sm">Please update your Firebase configuration in the source code or verify your Firestore security rules.</p>
-    </div>
-
-    <main class="flex-grow max-w-md mx-auto w-full p-4 relative pb-20">
-        
-        <!-- View: Home -->
-        <div id="view-home" class="view active space-y-6 mt-4">
-            <div class="text-center space-y-2">
-                <h2 class="text-3xl font-extrabold text-primary" id="home-welcome">WELCOME</h2>
-                <p class="text-slate-500">Walk in or reserve your preferred time.</p>
+    <!-- Navbar -->
+    <nav class="bg-primary text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold tracking-wider cursor-pointer" onclick="app.navigate('home')" id="nav-brand">
+                BARBERSHOP
             </div>
-            
-            <div class="space-y-4 mt-8">
-                <button onclick="navigate('join-queue')" class="w-full bg-primary hover:bg-secondary text-white font-bold py-4 px-6 rounded-xl shadow-lg flex flex-col items-center justify-center transition-all">
-                    <span class="text-xl">JOIN QUEUE</span>
-                    <span class="text-sm font-normal text-blue-200">Walk in and get your queue number</span>
-                </button>
+            <button onclick="app.navigate('home')" class="text-sm uppercase font-semibold tracking-wider hover:text-gray-300">Home</button>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="max-w-md mx-auto mt-6 px-4" id="app-container">
+
+        <!-- 1. HOME VIEW -->
+        <div id="view-home" class="view-section text-center">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-6 border-t-4 border-primary">
+                <div class="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-4 text-4xl shadow-inner">
+                    <i class="fas fa-cut"></i>
+                </div>
+                <h2 class="text-xl text-gray-500 font-medium mb-1">WELCOME TO</h2>
+                <h1 class="text-3xl font-bold text-primary mb-8 tracking-tight" id="home-shop-name">PREMIUM BARBERS</h1>
                 
-                <button onclick="navigate('book')" class="w-full bg-white border-2 border-primary text-primary hover:bg-slate-50 font-bold py-4 px-6 rounded-xl shadow flex flex-col items-center justify-center transition-all">
-                    <span class="text-xl">BOOK APPOINTMENT</span>
-                    <span class="text-sm font-normal text-slate-500">Reserve your preferred time slot</span>
+                <button onclick="app.navigate('queue')" class="w-full bg-primary hover:bg-blue-800 text-white font-bold py-4 px-6 rounded-lg shadow-md mb-4 transition duration-200 flex justify-between items-center text-lg">
+                    <span><i class="fas fa-users mr-2"></i> WALK-IN QUEUE</span>
+                    <i class="fas fa-chevron-right"></i>
                 </button>
+                <p class="text-sm text-gray-500 mb-6">Get your queue number instantly.</p>
+                
+                <div class="relative flex py-2 items-center mb-6">
+                    <div class="flex-grow border-t border-gray-200"></div>
+                    <span class="flex-shrink-0 mx-4 text-gray-400 text-sm font-semibold">OR</span>
+                    <div class="flex-grow border-t border-gray-200"></div>
+                </div>
+
+                <button onclick="app.navigate('book')" class="w-full bg-white hover:bg-gray-50 text-primary border-2 border-primary font-bold py-4 px-6 rounded-lg shadow-sm transition duration-200 flex justify-between items-center text-lg">
+                    <span><i class="far fa-calendar-alt mr-2"></i> BOOK APPOINTMENT</span>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+                <p class="text-sm text-gray-500 mt-2">Reserve your preferred time slot.</p>
             </div>
         </div>
 
-        <!-- View: Join Queue -->
-        <div id="view-join-queue" class="view space-y-6">
-            <div class="flex items-center space-x-3 mb-6 cursor-pointer" onclick="navigate('home')">
-                <span class="text-primary font-bold">&larr; Back</span>
-            </div>
-            <h2 class="text-2xl font-bold text-primary border-b pb-2">Join Queue</h2>
+        <!-- 2. JOIN QUEUE VIEW -->
+        <div id="view-queue" class="view-section hidden-view">
+            <button onclick="app.navigate('home')" class="text-primary mb-4 font-semibold"><i class="fas fa-arrow-left mr-1"></i> Back</button>
+            <h2 class="text-2xl font-bold text-primary mb-6">Join the Queue</h2>
             
-            <form id="form-queue" class="space-y-6" onsubmit="handleJoinQueue(event)">
+            <form id="form-queue" class="space-y-5 bg-white p-6 rounded-xl shadow-md border-t-4 border-primary">
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">1. Select Service</label>
-                    <div id="queue-services-list" class="space-y-2">
-                        <div class="text-center text-slate-500 py-4"><div class="loader"></div> Loading services...</div>
-                    </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Service</label>
+                    <select id="q-service" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
+                        <option value="">Loading services...</option>
+                    </select>
                 </div>
-
-                <div id="queue-barber-section">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">2. Select Barber (Optional)</label>
-                    <div id="queue-barbers-list" class="grid grid-cols-2 gap-2">
-                        <div class="text-center text-slate-500 col-span-2 py-4"><div class="loader"></div> Loading barbers...</div>
-                    </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Select Barber (Optional)</label>
+                    <select id="q-barber" class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
+                        <option value="">Any Available Barber</option>
+                    </select>
                 </div>
-
-                <div class="space-y-3">
-                    <label class="block text-sm font-bold text-slate-700">3. Your Information</label>
-                    <input type="text" id="queue-name" required placeholder="Your Name" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                    <input type="tel" id="queue-phone" required placeholder="Phone Number (e.g. 0123456789)" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                    <input type="text" id="q-name" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary" placeholder="Enter your name">
                 </div>
-
-                <button type="submit" id="btn-submit-queue" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-secondary">
-                    JOIN QUEUE NOW
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="tel" id="q-phone" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary" placeholder="0123456789">
+                </div>
+                <div id="q-error" class="text-red-500 text-sm hidden"></div>
+                <button type="submit" id="btn-join-queue" class="w-full bg-primary text-white font-bold py-4 rounded-lg shadow hover:bg-blue-800 transition">
+                    JOIN QUEUE
                 </button>
             </form>
         </div>
 
-        <!-- View: Queue Status -->
-        <div id="view-queue-status" class="view space-y-6 mt-4">
-            <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 text-center space-y-4">
-                <h2 class="text-sm font-bold tracking-widest text-slate-400 uppercase">Your Queue Number</h2>
-                <div id="status-queue-number" class="text-6xl font-black text-primary py-2">-</div>
-                <div id="status-badge" class="inline-block px-4 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 uppercase">WAITING</div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div class="bg-white p-4 rounded-xl shadow text-center border border-slate-100">
-                    <div class="text-xs font-bold text-slate-400 uppercase mb-1">Serving</div>
-                    <div id="status-serving-now" class="text-2xl font-bold text-slate-800">-</div>
+        <!-- 3. QUEUE STATUS VIEW -->
+        <div id="view-status" class="view-section hidden-view text-center">
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border-t-4 border-primary">
+                <h3 class="text-gray-500 font-bold uppercase tracking-wider text-sm mb-2">Your Queue Number</h3>
+                <div class="text-6xl font-black text-primary mb-6 tracking-tighter" id="status-q-num">--</div>
+                
+                <div class="inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-6 uppercase tracking-wide bg-gray-400" id="status-badge">
+                    LOADING
                 </div>
-                <div class="bg-white p-4 rounded-xl shadow text-center border border-slate-100">
-                    <div class="text-xs font-bold text-slate-400 uppercase mb-1">Ahead of You</div>
-                    <div id="status-ahead" class="text-2xl font-bold text-slate-800">-</div>
+
+                <div class="grid grid-cols-2 gap-4 border-t border-gray-100 pt-6 mt-2">
+                    <div class="text-center">
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Currently Serving</p>
+                        <p class="text-2xl font-bold text-gray-800" id="status-serving">--</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Customers Ahead</p>
+                        <p class="text-2xl font-bold text-gray-800" id="status-ahead">--</p>
+                    </div>
+                </div>
+                
+                <div class="bg-blue-50 rounded-lg p-4 mt-6">
+                    <p class="text-xs text-blue-400 uppercase font-bold tracking-wider mb-1">Est. Waiting Time</p>
+                    <p class="text-xl font-bold text-primary" id="status-time">-- MIN</p>
                 </div>
             </div>
-
-            <div class="bg-primary text-white p-6 rounded-2xl shadow-lg text-center">
-                <div class="text-sm font-medium text-blue-200 mb-1">Estimated Waiting Time</div>
-                <div id="status-est-time" class="text-3xl font-bold">-- MIN</div>
-                <p class="text-xs mt-2 text-blue-300">*Time is an approximation</p>
-            </div>
-
-            <div class="bg-white p-4 rounded-xl shadow border border-slate-100 text-sm">
-                <div class="flex justify-between py-2 border-b"><span class="text-slate-500">Service</span><span id="status-service" class="font-bold text-slate-800">-</span></div>
-                <div class="flex justify-between py-2"><span class="text-slate-500">Barber</span><span id="status-barber" class="font-bold text-slate-800">-</span></div>
-            </div>
-            
-            <button onclick="navigate('home')" class="w-full bg-white text-slate-800 font-bold py-3 rounded-xl border hover:bg-slate-50">Back to Home</button>
+            <p class="text-sm text-gray-500">Please do not close this page. Save the link to track your queue.</p>
         </div>
 
-        <!-- View: Book Appointment -->
-        <div id="view-book" class="view space-y-6">
-            <div class="flex items-center space-x-3 mb-4 cursor-pointer" onclick="navigate('home')">
-                <span class="text-primary font-bold">&larr; Back</span>
-            </div>
-            <h2 class="text-2xl font-bold text-primary border-b pb-2">Book Appointment</h2>
-            
-            <form id="form-book" class="space-y-6" onsubmit="handleBook(event)">
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Service</label>
-                    <select id="book-service" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary bg-white" onchange="generateTimeSlots()"></select>
-                </div>
+        <!-- 4. BOOKING VIEW -->
+        <div id="view-book" class="view-section hidden-view">
+            <button onclick="app.navigate('home')" class="text-primary mb-4 font-semibold"><i class="fas fa-arrow-left mr-1"></i> Back</button>
+            <h2 class="text-2xl font-bold text-primary mb-6">Book Appointment</h2>
 
+            <form id="form-book" class="space-y-5 bg-white p-6 rounded-xl shadow-md border-t-4 border-primary">
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Barber</label>
-                    <select id="book-barber" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary bg-white" onchange="generateTimeSlots()"></select>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Service</label>
+                    <select id="b-service" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
+                        <option value="">Select a service...</option>
+                    </select>
                 </div>
-
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Date</label>
-                    <input type="date" id="book-date" required class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary" onchange="generateTimeSlots()">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Barber</label>
+                    <select id="b-barber" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
+                        <option value="">Select a barber...</option>
+                    </select>
                 </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">Available Time</label>
-                    <div id="book-time-slots" class="grid grid-cols-3 gap-2">
-                        <div class="text-sm text-slate-500 col-span-3">Select a date, service, and barber first.</div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                        <input type="date" id="b-date" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
                     </div>
-                    <input type="hidden" id="book-time" required>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                        <select id="b-time" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
+                            <option value="">Select time...</option>
+                            <!-- Generated via JS based on barber hours -->
+                        </select>
+                    </div>
                 </div>
-
-                <div class="space-y-3">
-                    <label class="block text-sm font-bold text-slate-700">Your Details</label>
-                    <input type="text" id="book-name" required placeholder="Your Name" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary">
-                    <input type="tel" id="book-phone" required placeholder="Phone Number" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary">
-                    <input type="email" id="book-email" placeholder="Email (Optional)" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary">
-                    <textarea id="book-notes" placeholder="Notes (Optional)" rows="2" class="w-full p-3 border rounded-lg focus:ring-2 focus:ring-primary"></textarea>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <input type="text" id="b-name" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
                 </div>
-
-                <button type="submit" id="btn-submit-book" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-secondary">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                    <input type="tel" id="b-phone" required class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes (Optional)</label>
+                    <textarea id="b-notes" rows="2" class="w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-primary focus:border-primary"></textarea>
+                </div>
+                <div id="b-error" class="text-red-500 text-sm hidden"></div>
+                <button type="submit" id="btn-book" class="w-full bg-primary text-white font-bold py-4 rounded-lg shadow hover:bg-blue-800 transition">
                     CONFIRM BOOKING
                 </button>
             </form>
         </div>
 
-        <!-- View: Booking Confirmation -->
-        <div id="view-book-confirm" class="view space-y-6 mt-4">
-            <div id="ticket" class="bg-white p-6 rounded-2xl shadow-xl border-2 border-primary relative overflow-hidden">
-                <div class="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg">CONFIRMED</div>
-                <div class="text-center border-b border-dashed pb-4 mb-4">
-                    <h2 class="text-xl font-bold text-primary" id="ticket-shop">BARBERSHOP</h2>
-                    <p class="text-xs text-slate-500">BOOKING CONFIRMED</p>
-                    <div class="text-lg font-mono font-bold mt-2 text-slate-800" id="ticket-id">BK-000000</div>
+        <!-- 5. BOOKING SUCCESS VIEW -->
+        <div id="view-success" class="view-section hidden-view text-center">
+            <h2 class="text-2xl font-bold text-green-600 mb-6"><i class="fas fa-check-circle"></i> Booking Confirmed</h2>
+            
+            <div class="ticket-cutout border-2 border-gray-100 shadow-lg p-6 mb-8 text-left bg-white">
+                <div class="text-center mb-6 border-b border-dashed border-gray-300 pb-4">
+                    <h3 class="text-xl font-bold text-primary" id="ticket-shop-name">BARBERSHOP</h3>
+                    <p class="text-xs text-gray-400 mt-1" id="ticket-id">BK-000000</p>
                 </div>
                 
-                <div class="space-y-3 text-sm">
-                    <div class="flex justify-between"><span class="text-slate-500">Customer</span><span class="font-bold" id="ticket-name">Name</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Service</span><span class="font-bold" id="ticket-service">Service</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Barber</span><span class="font-bold" id="ticket-barber">Barber</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Date</span><span class="font-bold text-primary" id="ticket-date">Date</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Time</span><span class="font-bold text-primary text-lg" id="ticket-time">Time</span></div>
+                <div class="space-y-4 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Customer</span>
+                        <span class="font-bold text-gray-800" id="ticket-name">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Service</span>
+                        <span class="font-bold text-gray-800" id="ticket-service">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Barber</span>
+                        <span class="font-bold text-gray-800" id="ticket-barber">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Date</span>
+                        <span class="font-bold text-gray-800" id="ticket-date">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Time</span>
+                        <span class="font-bold text-gray-800" id="ticket-time">--</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-500">Status</span>
+                        <span class="font-bold text-green-600">CONFIRMED</span>
+                    </div>
                 </div>
             </div>
 
-            <button onclick="window.print()" class="w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow hover:bg-slate-700 flex items-center justify-center space-x-2">
-                <span>SCREENSHOT / SAVE THIS TICKET</span>
+            <button onclick="window.print()" class="w-full bg-gray-800 hover:bg-black text-white font-bold py-4 px-6 rounded-lg shadow-md mb-4 transition duration-200 flex justify-center items-center text-lg">
+                <i class="fas fa-camera mr-2"></i> SCREENSHOT THIS TICKET
             </button>
-            <button onclick="navigate('home')" class="w-full bg-white text-slate-800 font-bold py-3 rounded-xl border hover:bg-slate-50">Back to Home</button>
+            <button onclick="app.navigate('home')" class="text-primary font-semibold underline">Back to Home</button>
         </div>
 
     </main>
 
+    <!-- FIREBASE & APP LOGIC -->
+    <script>
+        window.app = {
+            navigate: (viewId, params = {}) => {
+                document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden-view'));
+                const view = document.getElementById(`view-${viewId}`);
+                if (view) view.classList.remove('hidden-view');
+                window.scrollTo(0,0);
+                
+                if(viewId === 'home') history.pushState(null, null, '#');
+                if(viewId === 'queue') history.pushState(null, null, '#queue');
+                if(viewId === 'book') history.pushState(null, null, '#book');
+                
+                if(viewId === 'status' && params.token) {
+                    history.pushState(null, null, `#status=${params.token}`);
+                    if (window.initQueueTracking) window.initQueueTracking(params.token);
+                }
+            }
+        };
+    </script>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, doc, getDoc, getDocs, setDoc, updateDoc, onSnapshot, query, where, orderBy, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
         // ================================
         // FIREBASE CONFIGURATION
-        // Replace these values with your Firebase Project config
+        // Replace these values
         // ================================
-        const firebaseConfig = {
-          apiKey: "AIzaSyBBXZkkgYlQgEvVwNcVeYJpBfcaFNo89j0",
+        let firebaseConfig = {
+            apiKey: "AIzaSyBBXZkkgYlQgEvVwNcVeYJpBfcaFNo89j0",
           authDomain: "my-barbershop-b9cf4.firebaseapp.com",
           projectId: "my-barbershop-b9cf4",
           storageBucket: "my-barbershop-b9cf4.firebasestorage.app",
           messagingSenderId: "201737777127",
           appId: "1:201737777127:web:ee0705ef36380be3221742",
-};
-
-        let db;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-        } catch (e) {
-            console.error("Firebase Initialization Error:", e);
-            document.getElementById('error-banner').classList.remove('hidden');
-            document.getElementById('error-message').textContent = "Failed to initialize Firebase. Please check your firebaseConfig credentials.";
-        }
-
-        const state = {
-            services: [
-                { id: 'fallback-1', name: 'Haircut', price: 25, duration: 30 },
-                { id: 'fallback-2', name: 'Haircut + Wash', price: 35, duration: 45 }
-            ],
-            barbers: [
-                { id: 'fallback-b1', name: 'Amir', services: [] }
-            ],
-            settings: { prefix: 'A', avgDuration: 30, open: '10:00', close: '20:00' },
-            unsubscribeQueue: null,
-            unsubscribeGlobal: null
         };
 
-        const escapeHTML = str => String(str).replace(/[&<>'"]/g, tag => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[tag] || tag));
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, doc, getDocs, getDoc, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFunctions, httpsCallable } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-functions.js";
 
-        async function init() {
-            if (!db) return;
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const functions = getFunctions(firebaseApp);
 
+        // State
+        let state = {
+            services: [],
+            barbers: [],
+            settings: { shopName: "PREMIUM BARBERS", avgDuration: 30 },
+            unsubscribeQueue: null
+        };
+
+        // Initialize Data
+        async function loadInitialData() {
             try {
-                // Load Settings (with fallback if document doesn't exist yet)
-                onSnapshot(doc(db, "settings", "business"), (docSnap) => {
-                    if(docSnap.exists()){
-                        const data = docSnap.data();
-                        document.getElementById('header-shop-name').textContent = escapeHTML(data.shopName || "BARBERSHOP");
-                        document.getElementById('home-welcome').textContent = escapeHTML(data.shopName || "WELCOME");
-                        if(data.prefix) state.settings.prefix = data.prefix;
-                        if(data.avgDuration) state.settings.avgDuration = data.avgDuration;
-                        if(data.openingTime) state.settings.open = data.openingTime;
-                        if(data.closingTime) state.settings.close = data.closingTime;
-                    }
-                }, (err) => {
-                    console.warn("Settings listener warning (Make sure collections are initialized in Firestore):", err.message);
-                });
+                // Load Settings
+                const setSnap = await getDoc(doc(db, "settings", "business"));
+                if(setSnap.exists()) {
+                    state.settings = setSnap.data();
+                    document.getElementById('home-shop-name').innerText = state.settings.shopName || 'PREMIUM BARBERS';
+                    document.getElementById('nav-brand').innerText = state.settings.shopName || 'BARBERSHOP';
+                }
 
                 // Load Services
-                const srvQ = query(collection(db, "services"), where("active", "==", true));
-                const srvSnap = await getDocs(srvQ);
-                if (!srvSnap.empty) {
-                    state.services = srvSnap.docs.map(d => ({id: d.id, ...d.data()}));
-                }
+                const srvSnap = await getDocs(query(collection(db, "services"), where("active", "==", true)));
+                state.services = srvSnap.docs.map(d => ({id: d.id, ...d.data()}));
                 
-                // Load Barbers
-                const barQ = query(collection(db, "barbers"), where("active", "==", true));
-                const barSnap = await getDocs(barQ);
-                if (!barSnap.empty) {
-                    state.barbers = barSnap.docs.map(d => ({id: d.id, ...d.data()}));
-                }
-            } catch (err) {
-                console.warn("Using offline fallback mode or waiting for Firestore setup:", err.message);
-            }
+                let srvHtml = '<option value="">Select a service...</option>';
+                state.services.forEach(s => {
+                    srvHtml += `<option value="${s.id}">${s.name} - RM${s.price || 0} (${s.duration} min)</option>`;
+                });
+                document.getElementById('q-service').innerHTML = srvHtml;
+                document.getElementById('b-service').innerHTML = srvHtml;
 
-            handleRouting();
-            window.addEventListener('hashchange', handleRouting);
+                // Load Barbers
+                const bbrSnap = await getDocs(query(collection(db, "barbers"), where("active", "==", true)));
+                state.barbers = bbrSnap.docs.map(d => ({id: d.id, ...d.data()}));
+                
+                let bbrHtml = '<option value="">Any Available Barber</option>';
+                let bookBbrHtml = '<option value="">Select a barber...</option>';
+                state.barbers.forEach(b => {
+                    bbrHtml += `<option value="${b.id}">${b.name}</option>`;
+                    bookBbrHtml += `<option value="${b.id}">${b.name}</option>`;
+                });
+                document.getElementById('q-barber').innerHTML = bbrHtml;
+                document.getElementById('b-barber').innerHTML = bookBbrHtml;
+
+                // Generate Booking Times (Simplistic 10AM-8PM for MVP)
+                let timeHtml = '<option value="">Select time...</option>';
+                for(let i=10; i<=19; i++) {
+                    timeHtml += `<option value="${i}:00">${i}:00</option>`;
+                    timeHtml += `<option value="${i}:30">${i}:30</option>`;
+                }
+                document.getElementById('b-time').innerHTML = timeHtml;
+                
+                // Set min date for booking
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('b-date').min = today;
+
+                checkUrlParams();
+            } catch (err) {
+                console.error("Error loading data:", err);
+            }
         }
 
-        // Routing
-        window.navigate = (viewId) => { window.location.hash = viewId; };
-        
-        function handleRouting() {
-            let hash = window.location.hash.replace('#', '') || 'home';
-            let params = new URLSearchParams(window.location.search);
-            
-            document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
-            
-            if (hash.startsWith('status')) {
-                const token = hash.split('?token=')[1] || params.get('token');
-                if (token) {
-                    hash = 'status';
-                    listenToQueueStatus(token);
-                } else {
-                    hash = 'home';
-                }
-            } else if (hash === 'join-queue') {
-                renderQueueForm();
-            } else if (hash === 'book') {
-                renderBookForm();
+        function checkUrlParams() {
+            const hash = window.location.hash;
+            if(hash.startsWith('#status=')) {
+                const token = hash.split('=')[1];
+                app.navigate('status', {token});
+            } else if (hash === '#queue') {
+                app.navigate('queue');
+            } else if (hash === '#book') {
+                app.navigate('book');
             }
-
-            const targetView = document.getElementById(`view-${hash}`);
-            if (targetView) targetView.classList.add('active');
-            else document.getElementById('view-home').classList.add('active');
         }
 
         // --- QUEUE LOGIC ---
-        function renderQueueForm() {
-            const srvList = document.getElementById('queue-services-list');
-            srvList.innerHTML = state.services.map(s => `
-                <label class="flex justify-between items-center p-4 border rounded-xl cursor-pointer hover:bg-slate-50 transition">
-                    <div class="flex items-center space-x-3">
-                        <input type="radio" name="q-service" value="${s.id}" class="w-5 h-5 text-primary" required onchange="window.updateQueueBarbers('${s.id}')">
-                        <div><div class="font-bold text-slate-800">${escapeHTML(s.name)}</div><div class="text-xs text-slate-500">${s.duration || 30} mins</div></div>
-                    </div>
-                    <div class="font-bold text-primary">RM${s.price}</div>
-                </label>
-            `).join('');
-
-            const barList = document.getElementById('queue-barbers-list');
-            barList.innerHTML = `
-                <label class="p-3 border rounded-xl cursor-pointer hover:bg-slate-50 text-center">
-                    <input type="radio" name="q-barber" value="any" checked class="hidden peer">
-                    <div class="peer-checked:font-bold peer-checked:text-primary">Any Barber</div>
-                </label>
-            ` + state.barbers.map(b => `
-                <label class="p-3 border rounded-xl cursor-pointer hover:bg-slate-50 text-center b-card" data-services='${JSON.stringify(b.services || [])}'>
-                    <input type="radio" name="q-barber" value="${b.id}" class="hidden peer">
-                    <div class="peer-checked:font-bold peer-checked:text-primary">${escapeHTML(b.name)}</div>
-                </label>
-            `).join('');
-        }
-
-        window.updateQueueBarbers = (serviceId) => {
-            document.querySelectorAll('.b-card').forEach(card => {
-                const serves = JSON.parse(card.getAttribute('data-services') || '[]');
-                if(serves.length === 0 || serves.includes(serviceId)) card.style.display = 'block';
-                else card.style.display = 'none';
-            });
-        };
-
-        window.handleJoinQueue = async (e) => {
+        document.getElementById('form-queue').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btn-submit-queue');
-            btn.innerHTML = '<div class="loader border-white"></div>';
-            btn.disabled = true;
+            const btn = document.getElementById('btn-join-queue');
+            const err = document.getElementById('q-error');
+            
+            const data = {
+                serviceId: document.getElementById('q-service').value,
+                barberId: document.getElementById('q-barber').value || null,
+                name: document.getElementById('q-name').value,
+                phone: document.getElementById('q-phone').value
+            };
 
-            const serviceId = document.querySelector('input[name="q-service"]:checked').value;
-            const service = state.services.find(s => s.id === serviceId) || state.services[0];
-            const barberId = document.querySelector('input[name="q-barber"]:checked').value;
-            const barber = barberId === 'any' ? {name: 'Any Barber'} : (state.barbers.find(b => b.id === barberId) || {name: 'Barber'});
-            const name = document.getElementById('queue-name').value;
-            const phone = document.getElementById('queue-phone').value;
-            const token = Math.random().toString(36).substr(2, 16);
-            const today = new Date().toISOString().split('T')[0];
+            btn.innerHTML = '<span class="spinner"></span> Joining...';
+            btn.disabled = true;
+            err.classList.add('hidden');
 
             try {
-                const counterRef = doc(db, 'settings', 'queueCounter');
-                const qNumberInfo = await runTransaction(db, async (transaction) => {
-                    const counterDoc = await transaction.get(counterRef);
-                    let nextSeq = 1;
-                    if(counterDoc.exists() && counterDoc.data().date === today) {
-                        nextSeq = counterDoc.data().sequence + 1;
-                    }
-                    transaction.set(counterRef, { date: today, sequence: nextSeq });
-                    return { seq: nextSeq, formatted: `${state.settings.prefix}${String(nextSeq).padStart(3, '0')}` };
-                });
-
-                const queueData = {
-                    queueNumber: qNumberInfo.formatted,
-                    queueSequence: qNumberInfo.seq,
-                    customerName: name,
-                    phone: phone,
-                    serviceId: service.id,
-                    serviceName: service.name,
-                    barberId: barberId === 'any' ? null : barberId,
-                    barberName: barber.name,
-                    status: 'WAITING',
-                    businessDate: today,
-                    createdAt: serverTimestamp(),
-                    trackingToken: token
-                };
-
-                await setDoc(doc(collection(db, "queues")), queueData);
-                window.location.href = `#status?token=${token}`;
-                e.target.reset();
-            } catch (err) {
-                console.error(err);
-                alert("Error joining queue: " + err.message);
+                // Secure server-side call
+                const joinQueueFn = httpsCallable(functions, 'apiJoinQueue');
+                const result = await joinQueueFn(data);
+                app.navigate('status', {token: result.data.trackingToken});
+                document.getElementById('form-queue').reset();
+            } catch (error) {
+                err.innerText = error.message || "Failed to join queue. Please try again.";
+                err.classList.remove('hidden');
             } finally {
-                btn.innerHTML = 'JOIN QUEUE NOW';
+                btn.innerHTML = 'JOIN QUEUE';
                 btn.disabled = false;
             }
-        };
+        });
 
-        function listenToQueueStatus(token) {
-            document.getElementById('view-queue-status').classList.add('active');
-            
+        window.initQueueTracking = initQueueTracking;
+        
+        function initQueueTracking(token) {
             if(state.unsubscribeQueue) state.unsubscribeQueue();
-            if(state.unsubscribeGlobal) state.unsubscribeGlobal();
-
-            const q = query(collection(db, "queues"), where("trackingToken", "==", token));
-            state.unsubscribeQueue = onSnapshot(q, (snapshot) => {
+            
+            const qRef = query(collection(db, "queues"), where("trackingToken", "==", token));
+            
+            state.unsubscribeQueue = onSnapshot(qRef, async (snapshot) => {
                 if(snapshot.empty) {
+                    alert("Queue ticket not found or expired.");
+                    app.navigate('home');
                     return;
                 }
-                const myQueue = snapshot.docs[0].data();
                 
-                document.getElementById('status-queue-number').textContent = escapeHTML(myQueue.queueNumber);
-                document.getElementById('status-service').textContent = escapeHTML(myQueue.serviceName);
-                document.getElementById('status-barber').textContent = escapeHTML(myQueue.barberName);
+                const queueData = snapshot.docs[0].data();
+                document.getElementById('status-q-num').innerText = queueData.queueNumber;
                 
                 const badge = document.getElementById('status-badge');
-                badge.textContent = myQueue.status;
-                if(myQueue.status === 'WAITING') badge.className = "inline-block px-4 py-1 rounded-full text-sm font-bold bg-blue-100 text-blue-800 uppercase";
-                if(myQueue.status === 'CALLED') badge.className = "inline-block px-4 py-1 rounded-full text-sm font-bold bg-yellow-100 text-yellow-800 uppercase animate-pulse";
-                if(myQueue.status === 'SERVING') badge.className = "inline-block px-4 py-1 rounded-full text-sm font-bold bg-green-100 text-green-800 uppercase";
-                if(['COMPLETED', 'CANCELLED', 'SKIPPED'].includes(myQueue.status)) badge.className = "inline-block px-4 py-1 rounded-full text-sm font-bold bg-slate-100 text-slate-800 uppercase";
+                badge.innerText = queueData.status;
+                badge.className = 'inline-block px-4 py-1 rounded-full text-sm font-bold text-white mb-6 uppercase tracking-wide ';
+                
+                if(queueData.status === 'WAITING') badge.className += 'bg-yellow-500';
+                else if(queueData.status === 'CALLED') { badge.className += 'bg-green-500'; badge.innerText = 'YOU ARE NEXT'; }
+                else if(queueData.status === 'SERVING') { badge.className += 'bg-blue-600'; badge.innerText = 'SERVICE STARTED'; }
+                else if(queueData.status === 'COMPLETED') { badge.className += 'bg-gray-800'; badge.innerText = 'THANK YOU'; }
+                else badge.className += 'bg-red-500';
 
-                if (myQueue.status === 'WAITING') {
-                    const today = new Date().toISOString().split('T')[0];
-                    const activeQ = query(collection(db, "queues"), where("businessDate", "==", today), where("status", "in", ["WAITING", "SERVING"]));
-                    state.unsubscribeGlobal = onSnapshot(activeQ, (globalSnap) => {
-                        let ahead = 0;
-                        let servingNow = '-';
-                        globalSnap.docs.forEach(d => {
-                            const qData = d.data();
-                            if(qData.status === 'SERVING') servingNow = qData.queueNumber;
-                            if(qData.status === 'WAITING' && qData.queueSequence < myQueue.queueSequence) ahead++;
-                        });
-                        document.getElementById('status-ahead').textContent = ahead;
-                        document.getElementById('status-serving-now').textContent = servingNow;
-                        
-                        const activeBarbersCount = state.barbers.length || 1;
-                        const estMins = Math.ceil((ahead * state.settings.avgDuration) / activeBarbersCount);
-                        document.getElementById('status-est-time').textContent = `~${estMins} MIN`;
-                    });
+                // Calculate metrics (Currently serving & Ahead)
+                if(queueData.status === 'WAITING') {
+                    const today = queueData.businessDate;
+                    const servingQuery = query(collection(db, "queues"), where("businessDate", "==", today), where("status", "in", ["CALLED", "SERVING"]), orderBy("queueSequence", "desc"));
+                    const servingSnap = await getDocs(servingQuery);
+                    let currentServingNum = "--";
+                    if(!servingSnap.empty) currentServingNum = servingSnap.docs[0].data().queueNumber;
+                    
+                    const aheadQuery = query(collection(db, "queues"), where("businessDate", "==", today), where("status", "==", "WAITING"), where("queueSequence", "<", queueData.queueSequence));
+                    const aheadSnap = await getDocs(aheadQuery);
+                    const aheadCount = aheadSnap.size;
+
+                    document.getElementById('status-serving').innerText = currentServingNum;
+                    document.getElementById('status-ahead').innerText = aheadCount;
+                    
+                    const estMins = aheadCount * (state.settings.avgDuration || 30);
+                    document.getElementById('status-time').innerText = `~${estMins} MIN`;
                 } else {
-                    document.getElementById('status-ahead').textContent = '-';
-                    document.getElementById('status-est-time').textContent = myQueue.status === 'CALLED' ? 'YOU ARE NEXT!' : '--';
+                    document.getElementById('status-serving').innerText = "-";
+                    document.getElementById('status-ahead').innerText = "0";
+                    document.getElementById('status-time').innerText = "-";
                 }
-            }, (error) => {
-                console.error("Queue tracking error:", error);
             });
         }
 
         // --- BOOKING LOGIC ---
-        function renderBookForm() {
-            const srvSel = document.getElementById('book-service');
-            srvSel.innerHTML = '<option value="">Select a service...</option>' + state.services.map(s => `<option value="${s.id}">${escapeHTML(s.name)} - RM${s.price} (${s.duration || 30}m)</option>`).join('');
-            
-            const barSel = document.getElementById('book-barber');
-            barSel.innerHTML = '<option value="">Select a barber...</option>' + state.barbers.map(b => `<option value="${b.id}">${escapeHTML(b.name)}</option>`).join('');
-            
-            const dateInput = document.getElementById('book-date');
-            const today = new Date();
-            dateInput.min = today.toISOString().split('T')[0];
-            today.setDate(today.getDate() + 14);
-            dateInput.max = today.toISOString().split('T')[0];
-        }
-
-        window.generateTimeSlots = async () => {
-            const date = document.getElementById('book-date').value;
-            const barberId = document.getElementById('book-barber').value;
-            const serviceId = document.getElementById('book-service').value;
-            const container = document.getElementById('book-time-slots');
-            const hiddenTime = document.getElementById('book-time');
-            
-            hiddenTime.value = "";
-            
-            if(!date || !barberId || !serviceId) {
-                container.innerHTML = '<div class="text-sm text-slate-500 col-span-3">Select date, service, and barber to see times.</div>';
-                return;
-            }
-
-            container.innerHTML = '<div class="loader"></div>';
-
-            let bookedTimes = [];
-            try {
-                const bq = query(collection(db, "bookings"), where("date", "==", date), where("barberId", "==", barberId), where("status", "in", ["CONFIRMED", "ARRIVED"]));
-                const existingSnaps = await getDocs(bq);
-                bookedTimes = existingSnaps.docs.map(d => d.data().startTime);
-            } catch(e) {
-                console.warn("Could not fetch existing bookings:", e);
-            }
-
-            let slotsHTML = '';
-            const startH = parseInt(state.settings.open.split(':')[0]);
-            const endH = parseInt(state.settings.close.split(':')[0]);
-            
-            for(let h = startH; h < endH; h++) {
-                ['00', '30'].forEach(m => {
-                    const timeStr = `${String(h).padStart(2, '0')}:${m}`;
-                    const isBooked = bookedTimes.includes(timeStr);
-                    const disabledStr = isBooked ? 'opacity-50 cursor-not-allowed bg-slate-100' : 'cursor-pointer hover:bg-slate-50 border-primary bg-white time-slot';
-                    
-                    slotsHTML += `
-                        <div class="border p-2 rounded text-center text-sm font-bold ${disabledStr}" 
-                             ${!isBooked ? `onclick="window.selectTime(this, '${timeStr}')"` : ''}>
-                            ${timeStr}
-                        </div>
-                    `;
-                });
-            }
-            container.innerHTML = slotsHTML;
-        };
-
-        window.selectTime = (element, timeStr) => {
-            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('bg-primary', 'text-white'));
-            element.classList.add('bg-primary', 'text-white');
-            document.getElementById('book-time').value = timeStr;
-        };
-
-        window.handleBook = async (e) => {
+        document.getElementById('form-book').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const time = document.getElementById('book-time').value;
-            if(!time) return alert("Please select a time slot.");
+            const btn = document.getElementById('btn-book');
+            const err = document.getElementById('b-error');
+            
+            const data = {
+                serviceId: document.getElementById('b-service').value,
+                barberId: document.getElementById('b-barber').value,
+                date: document.getElementById('b-date').value,
+                time: document.getElementById('b-time').value,
+                name: document.getElementById('b-name').value,
+                phone: document.getElementById('b-phone').value,
+                notes: document.getElementById('b-notes').value
+            };
 
-            const btn = document.getElementById('btn-submit-book');
-            btn.innerHTML = '<div class="loader border-white"></div>';
+            btn.innerHTML = '<span class="spinner"></span> Validating...';
             btn.disabled = true;
-
-            const serviceId = document.getElementById('book-service').value;
-            const service = state.services.find(s => s.id === serviceId) || state.services[0];
-            const barberId = document.getElementById('book-barber').value;
-            const barber = state.barbers.find(b => b.id === barberId) || state.barbers[0];
-            const date = document.getElementById('book-date').value;
-            const name = document.getElementById('book-name').value;
-            const phone = document.getElementById('book-phone').value;
-            const email = document.getElementById('book-email').value;
-            const notes = document.getElementById('book-notes').value;
+            err.classList.add('hidden');
 
             try {
-                const slotId = `${barberId}_${date}_${time.replace(':','')}`;
-                const slotRef = doc(db, 'booking_slots', slotId);
-
-                await runTransaction(db, async (transaction) => {
-                    const slotDoc = await transaction.get(slotRef);
-                    if(slotDoc.exists()) throw new Error("Slot already taken");
-                    transaction.set(slotRef, { lockedAt: serverTimestamp(), phone });
-                });
-
-                const duration = service.duration || 30;
-                const [h, m] = time.split(':').map(Number);
-                const endH = h + Math.floor((m + duration) / 60);
-                const endM = (m + duration) % 60;
-                const endTime = `${String(endH).padStart(2,'0')}:${String(endM).padStart(2,'0')}`;
-
-                const bookingId = `BK-${date.replace(/-/g,'')}-${Math.floor(1000 + Math.random() * 9000)}`;
-
-                const bookingData = {
-                    bookingId, customerName: name, phone, email,
-                    serviceId, serviceName: service.name,
-                    barberId, barberName: barber.name,
-                    date, startTime: time, endTime,
-                    price: service.price, duration: duration,
-                    status: 'CONFIRMED', notes,
-                    createdAt: serverTimestamp()
-                };
-
-                await setDoc(doc(db, "bookings", bookingId), bookingData);
-
-                document.getElementById('ticket-id').textContent = bookingId;
-                document.getElementById('ticket-name').textContent = escapeHTML(name);
-                document.getElementById('ticket-service').textContent = escapeHTML(service.name);
-                document.getElementById('ticket-barber').textContent = escapeHTML(barber.name);
-                document.getElementById('ticket-date').textContent = date;
-                document.getElementById('ticket-time').textContent = time;
+                // Secure server-side validation & creation
+                const bookFn = httpsCallable(functions, 'apiBookAppointment');
+                const result = await bookFn(data);
                 
-                navigate('book-confirm');
-                e.target.reset();
-
-            } catch (err) {
-                console.error(err);
-                alert("This time slot is no longer available or there was a connection error. Please try another time.");
-                window.generateTimeSlots();
+                // Show Success Ticket
+                document.getElementById('ticket-shop-name').innerText = state.settings.shopName || 'BARBERSHOP';
+                document.getElementById('ticket-id').innerText = result.data.bookingId;
+                document.getElementById('ticket-name').innerText = data.name;
+                document.getElementById('ticket-service').innerText = state.services.find(s=>s.id===data.serviceId)?.name || '';
+                document.getElementById('ticket-barber').innerText = state.barbers.find(b=>b.id===data.barberId)?.name || '';
+                document.getElementById('ticket-date').innerText = data.date;
+                document.getElementById('ticket-time').innerText = data.time;
+                
+                app.navigate('success');
+                document.getElementById('form-book').reset();
+            } catch (error) {
+                err.innerText = error.message || "Slot unavailable. Please select another time.";
+                err.classList.remove('hidden');
             } finally {
                 btn.innerHTML = 'CONFIRM BOOKING';
                 btn.disabled = false;
             }
-        };
+        });
 
-        init();
+        // Start App
+        window.addEventListener('popstate', checkUrlParams);
+        loadInitialData();
+
     </script>
 </body>
 </html>
