@@ -237,6 +237,9 @@
         const App = {
             data: { services: [], barbers: [], settings: null },
             unsubscribeQueue: null,
+            unsubscribeActiveQueue: null,
+            currentTicketState: null,
+            queueStats: { currentServing: '--', aheadCount: 0 },
             
             async init() {
                 this.showLoading(true);
@@ -302,8 +305,9 @@
             navigate(viewId) {
                 document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden-view'));
                 document.getElementById(`view-${viewId}`).classList.remove('hidden-view');
-                if(this.unsubscribeQueue && viewId !== 'queue-status') {
-                    this.unsubscribeQueue();
+                if(viewId !== 'queue-status') {
+                    if(this.unsubscribeQueue) { this.unsubscribeQueue(); this.unsubscribeQueue = null; }
+                    if(this.unsubscribeActiveQueue) { this.unsubscribeActiveQueue(); this.unsubscribeActiveQueue = null; }
                     window.history.replaceState({}, document.title, window.location.pathname);
                 }
             },
@@ -380,67 +384,88 @@
                 this.showLoading(true);
                 this.navigate('queue-status');
                 
-                if (this.unsubscribeQueue) this.unsubscribeQueue();
+                if (this.unsubscribeQueue) { this.unsubscribeQueue(); this.unsubscribeQueue = null; }
+                if (this.unsubscribeActiveQueue) { this.unsubscribeActiveQueue(); this.unsubscribeActiveQueue = null; }
 
-                this.unsubscribeQueue = onSnapshot(doc(db, "queues", token), async (docSnap) => {
+                this.unsubscribeQueue = onSnapshot(doc(db, "queues", token), (docSnap) => {
                     this.showLoading(false);
                     if (!docSnap.exists()) return;
                     
-                    const q = docSnap.data();
-                    document.getElementById('qs-my-number').innerText = q.queueNumber;
-                    document.getElementById('qs-service').innerText = q.serviceName;
-                    document.getElementById('qs-barber').innerText = q.barberName;
-                    
-                    const badge = document.getElementById('status-badge');
-                    badge.innerText = q.status;
-                    
-                    const alertBox = document.getElementById('qs-alert');
-                    alertBox.className = "mt-6 p-4 rounded-lg font-bold text-lg hidden";
-                    
-                    if (q.status === "WAITING") {
-                        badge.className = "absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-lg";
-                    } else if (q.status === "CALLED") {
-                        badge.className = "absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg animate-pulse";
-                        alertBox.classList.remove('hidden');
-                        alertBox.classList.add('bg-blue-100', 'text-blue-800', 'animate-pulse');
-                        alertBox.innerText = "YOU ARE NEXT. PLEASE PROCEED TO BARBER.";
-                    } else if (q.status === "SERVING") {
-                        badge.className = "absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg";
-                        alertBox.classList.remove('hidden');
-                        alertBox.classList.add('bg-green-100', 'text-green-800');
-                        alertBox.classList.remove('animate-pulse');
-                        alertBox.innerText = "YOUR SERVICE HAS STARTED.";
-                    } else if (q.status === "COMPLETED") {
-                        badge.className = "absolute top-0 right-0 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg";
-                        alertBox.classList.remove('hidden');
-                        alertBox.classList.add('bg-gray-100', 'text-gray-800');
-                        alertBox.innerText = "THANK YOU FOR VISITING!";
-                    }
+                    this.currentTicketState = docSnap.data();
+                    this.updateQueueUI();
 
-                    // Calculate current & ahead (simplified for client-side MVP)
-                    if (q.status === "WAITING") {
-                        const allQ = await getDocs(query(collection(db, "queues"), where("businessDate", "==", q.businessDate), where("status", "in", ["WAITING", "CALLED", "SERVING"])));
-                        let currentServing = "--";
-                        let aheadCount = 0;
+                    if (!this.unsubscribeActiveQueue && this.currentTicketState.businessDate) {
+                        const activeQuery = query(collection(db, "queues"), where("businessDate", "==", this.currentTicketState.businessDate));
                         
-                        allQ.forEach(d => {
-                            const dq = d.data();
-                            if (dq.status === "SERVING" || dq.status === "CALLED") currentServing = dq.queueNumber;
-                            if (dq.status === "WAITING" && dq.queueSequence < q.queueSequence) aheadCount++;
+                        this.unsubscribeActiveQueue = onSnapshot(activeQuery, (querySnapshot) => {
+                            const docs = querySnapshot.docs.map(d => d.data());
+                            
+                            // Find currently serving (Highest sequence among CALLED or SERVING)
+                            const activeTix = docs.filter(dq => dq.status === "SERVING" || dq.status === "CALLED");
+                            activeTix.sort((a,b) => b.queueSequence - a.queueSequence);
+                            const currentServing = activeTix.length > 0 ? activeTix[0].queueNumber : "--";
+                            
+                            // Find customers ahead of THIS user
+                            let aheadCount = 0;
+                            if (this.currentTicketState) {
+                                aheadCount = docs.filter(dq => dq.status === "WAITING" && dq.queueSequence < this.currentTicketState.queueSequence).length;
+                            }
+                            
+                            this.queueStats = { currentServing, aheadCount };
+                            this.updateQueueUI(); // Trigger UI update when general queue changes
                         });
-                        
-                        document.getElementById('qs-current').innerText = currentServing;
-                        document.getElementById('qs-ahead').innerText = aheadCount;
-                        
-                        const avgDuration = this.data.settings.avgDuration || 30;
-                        const activeBarbers = this.data.barbers.length || 1;
-                        const eta = Math.ceil((aheadCount * avgDuration) / activeBarbers);
-                        document.getElementById('qs-eta').innerText = `${eta}-${eta+15} min`;
-                    } else {
-                         document.getElementById('qs-ahead').innerText = "0";
-                         document.getElementById('qs-eta').innerText = "-- min";
                     }
                 });
+            },
+
+            updateQueueUI() {
+                if (!this.currentTicketState) return;
+                const q = this.currentTicketState;
+                
+                document.getElementById('qs-my-number').innerText = q.queueNumber;
+                document.getElementById('qs-service').innerText = q.serviceName;
+                document.getElementById('qs-barber').innerText = q.barberName;
+                
+                const badge = document.getElementById('status-badge');
+                badge.innerText = q.status;
+                
+                const alertBox = document.getElementById('qs-alert');
+                alertBox.className = "mt-6 p-4 rounded-lg font-bold text-lg hidden";
+                
+                if (q.status === "WAITING") {
+                    badge.className = "absolute top-0 right-0 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-bl-lg";
+                } else if (q.status === "CALLED") {
+                    badge.className = "absolute top-0 right-0 bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg animate-pulse";
+                    alertBox.classList.remove('hidden');
+                    alertBox.classList.add('bg-blue-100', 'text-blue-800', 'animate-pulse');
+                    alertBox.innerText = "YOU ARE NEXT. PLEASE PROCEED TO BARBER.";
+                } else if (q.status === "SERVING") {
+                    badge.className = "absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg";
+                    alertBox.classList.remove('hidden');
+                    alertBox.classList.add('bg-green-100', 'text-green-800');
+                    alertBox.classList.remove('animate-pulse');
+                    alertBox.innerText = "YOUR SERVICE HAS STARTED.";
+                } else if (q.status === "COMPLETED") {
+                    badge.className = "absolute top-0 right-0 bg-gray-500 text-white text-xs font-bold px-3 py-1 rounded-bl-lg";
+                    alertBox.classList.remove('hidden');
+                    alertBox.classList.add('bg-gray-100', 'text-gray-800');
+                    alertBox.innerText = "THANK YOU FOR VISITING!";
+                }
+
+                // Update real-time stats (Currently Serving & Customers Ahead)
+                if (q.status === "WAITING") {
+                    document.getElementById('qs-current').innerText = this.queueStats.currentServing;
+                    document.getElementById('qs-ahead').innerText = this.queueStats.aheadCount;
+                    
+                    const avgDuration = this.data.settings?.avgDuration || 30;
+                    const activeBarbers = this.data.barbers?.length || 1;
+                    const eta = Math.ceil((this.queueStats.aheadCount * avgDuration) / activeBarbers);
+                    document.getElementById('qs-eta').innerText = `${eta}-${eta+15} min`;
+                } else {
+                    document.getElementById('qs-current').innerText = this.queueStats.currentServing;
+                    document.getElementById('qs-ahead').innerText = "0";
+                    document.getElementById('qs-eta').innerText = "-- min";
+                }
             },
 
             async submitBooking(e) {
